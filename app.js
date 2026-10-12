@@ -1,11 +1,11 @@
 // ============================================================
 // LTTQ PTIQ - Frontend Application
-// Version: 1.2
+// Version: 1.3
 // ============================================================
 (function(){
 'use strict';
 
-var GAS_URL = 'https://script.google.com/macros/s/AKfycby6-xwNwHUyAlfpNPoXBalboarI3RnF9F4x78ZZmx3Yo3s-Rc8SZ6OYi4AGS0VzqdA/exec';
+var GAS_URL = 'https://script.google.com/macros/s/AKfycby_E4w4_-75Xz8BraK-1zQrgo27nDrcZNr_8bYXoR2zwFQlCqVBBl15qPOWPxIaeTMWEQ/exec';
 var SESSION_KEY = 'lttq_session';
 var TOKEN_KEY = 'lttq_token';
 
@@ -471,13 +471,33 @@ async function loadPendaftaran(){
     document.getElementById('tbodyUjian').innerHTML = '<tr><td colspan="8" style="text-align:center;padding:30px;color:var(--red);">Gagal memuat</td></tr>';
   }
 }
+
+// ============ OPEN JADWAL (DENGAN DROPDOWN DOSEN) ============
 function openJadwal(id){
   document.getElementById('jadwalId').value = id;
-  document.getElementById('jadwalPenguji').value = '';
   document.getElementById('jadwalTgl').value = '';
   document.getElementById('jadwalWaktu').value = '';
+
+  var selectEl = document.getElementById('jadwalPenguji');
+  selectEl.innerHTML = '<option value="">Memuat daftar dosen...</option>';
   document.getElementById('modalJadwal').classList.add('show');
+
+  apiCall('getDosenList', {})
+    .then(function(res){
+      if(res.success && res.data && res.data.length){
+        selectEl.innerHTML = '<option value="">-- Pilih Dosen Penguji --</option>' +
+          res.data.map(function(d){
+            return '<option value="' + d.nama + '">' + d.nama + ' (' + d.username + ')</option>';
+          }).join('');
+      } else {
+        selectEl.innerHTML = '<option value="">Tidak ada dosen aktif terdaftar</option>';
+      }
+    })
+    .catch(function(){
+      selectEl.innerHTML = '<option value="">Gagal memuat daftar dosen</option>';
+    });
 }
+
 async function saveJadwal(){
   var id = document.getElementById('jadwalId').value;
   var penguji = document.getElementById('jadwalPenguji').value.trim();
@@ -682,7 +702,7 @@ document.addEventListener('DOMContentLoaded', function(){
   document.querySelectorAll('.app-nav-menu a[data-nav]').forEach(function(a){
     a.addEventListener('click', function(){ document.getElementById('appNavMenu').classList.remove('open'); });
   });
-  console.log('LTTQ PTIQ v1.2 initialized.');
+  console.log('LTTQ PTIQ v1.3 initialized.');
 });
 
 // Export to window
