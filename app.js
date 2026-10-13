@@ -1,6 +1,6 @@
 // LTTQ PTIQ app.js v2.0
 // ============================================================
-var GAS_URL = 'https://script.google.com/macros/s/AKfycbwr5UJ-9PBBwCS83bCShMi8avNWh7oJc-fSRYgn3af-z9C6vTjSi2E2sHps4SNc4Iz_1A/exec';
+var GAS_URL = 'https://script.google.com/macros/s/AKfycbxqjRF-vmiYB52oSW1MjVR1vjO8RR9U6mUR263dA_2tdJ7XfpTas1tLycB57cTGDyTLgw/exec';
 
 var currentUser = null;
 var currentToken = null;
@@ -692,3 +692,58 @@ document.addEventListener('DOMContentLoaded', function(){
 
   console.log('✅ LTTQ PTIQ v2.0 loaded');
 });
+// ========== SWITCH FORM SERTIFIKAT ==========
+function switchSertifikatForm(){
+  var jenis = document.getElementById('sertJenis').value;
+  var formSyahadah = document.getElementById('sertFormSyahadah');
+  var formKegiatan = document.getElementById('sertFormKegiatan');
+
+  if(jenis === 'kegiatan'){
+    formSyahadah.style.display = 'none';
+    formKegiatan.style.display = 'block';
+  } else {
+    formSyahadah.style.display = 'block';
+    formKegiatan.style.display = 'none';
+    updateKaligrafiDefault();
+  }
+}
+
+// ========== CETAK SERTIFIKAT KEGIATAN ==========
+async function bukaSertifikatKegiatan(){
+  var data = {
+    nomorSeri: document.getElementById('kgNomor').value.trim(),
+    namaPeserta: document.getElementById('kgNama').value.trim(),
+    judulSertifikat: document.getElementById('kgJudul').value.trim(),
+    namaKegiatan: document.getElementById('kgKegiatan').value.trim(),
+    tanggal: document.getElementById('kgTanggal').value,
+    kalimatIsi: document.getElementById('kgKalimat').value.trim(),
+    kaligrafi: document.getElementById('kgKaligrafi').value.trim(),
+    ttd1Jabatan: document.getElementById('kgTtd1Jabatan').value.trim(),
+    ttd1Nama: document.getElementById('kgTtd1Nama').value.trim(),
+    ttd1Nidn: document.getElementById('kgTtd1Nidn').value.trim(),
+    ttd2Jabatan: document.getElementById('kgTtd2Jabatan').value.trim(),
+    ttd2Nama: document.getElementById('kgTtd2Nama').value.trim(),
+    ttd2Nidn: document.getElementById('kgTtd2Nidn').value.trim()
+  };
+
+  if(!data.nomorSeri){ showToast('Peringatan','Masukkan nomor seri',true); return; }
+  if(!data.namaPeserta){ showToast('Peringatan','Masukkan nama peserta',true); return; }
+  if(!data.namaKegiatan){ showToast('Peringatan','Masukkan nama kegiatan',true); return; }
+  if(!data.tanggal){ showToast('Peringatan','Masukkan tanggal',true); return; }
+
+  try{
+    var res = await apiCall('getSertifikatKegiatan', data);
+    if(res.success){
+      var w = window.open('','_blank');
+      w.document.write(res.html);
+      w.document.close();
+    } else {
+      showToast('Gagal', res.message, true);
+    }
+  }catch(e){
+    showToast('Error', 'Gagal terhubung: ' + e.message, true);
+  }
+}
+
+window.switchSertifikatForm = switchSertifikatForm;
+window.bukaSertifikatKegiatan = bukaSertifikatKegiatan;
